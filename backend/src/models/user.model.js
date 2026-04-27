@@ -16,13 +16,12 @@ const userSchema = new Schema(
     }, {timestamps: true}
 )
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
 
     //this will encrpyt pass everytime when user click saves.
     //so we will add if stmt
-    if (!this.isModified("password")) return next()
-    this.password = bcrypt.hash(this.password, 10)
-    next()
+    if (!this.isModified("password")) return
+    this.password = await bcrypt.hash(this.password, 10)
 })
 
 
