@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
-
+import jwt from "jsonwebtoken"
 
 const regiseterUser = asyncHandler(async (req, res) => {
     // get the user data from the frontend
@@ -98,7 +98,7 @@ const loginUser = asyncHandler( async(req,res) => {
 
     const {username, email, password} = req.body
 
-    if (!username || !email) {
+    if (!username && !email) {
         throw new ApiError(400, "Username or Email is Required.")
     }
 
@@ -161,5 +161,50 @@ const logoutUser = asyncHandler( async(req,res) => {
 
 })
 
+const refreshAccessToken = asyncHandler( async(req,res) => {
+    //get the refresh token from cookies
+    //verify the refresh token
+    //generate new access token and refresh token
+    //update the refresh token in DB
+    //send the new access token and refresh token in cookies
 
-export { regiseterUser, loginUser, logoutUser }
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
+
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized! Refresh Token is required.")
+    }
+
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+    
+        const user = await User.findById(decodedToken._id)
+        
+        if (!user) {
+            throw new ApiError(404, "User not found.")
+        }
+    
+        if (user?.refreshToken !== incomingRefreshToken) {
+            throw new ApiError(401, "Unauthorized! Invalid Refresh Token.")
+        }
+    
+        const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id)
+    
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+    
+        return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", newRefreshToken, options).json(
+            new ApiResponse(200, {
+                accessToken, newRefreshToken
+            }, "Access Token refreshed successfully.")
+        )
+    } catch (error) {
+        throw new ApiError(401, "Unauthorized! Invalid Refresh Token.")
+    }
+
+}
+)
+    
+
+export { regiseterUser, loginUser, logoutUser, refreshAccessToken }
