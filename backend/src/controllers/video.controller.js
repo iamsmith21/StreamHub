@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 const publishAVideo = asyncHandler(async (req, res) => {
     //title, desc, and select a video file and thumbnail picture'
@@ -38,6 +38,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         title: title,
         description: description,
         duration: video.duration,
+        // owner: new mongoose.Types.ObjectId()
         owner: req.user._id
     })
 
