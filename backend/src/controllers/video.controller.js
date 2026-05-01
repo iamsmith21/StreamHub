@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
 import mongoose, { mongo } from "mongoose";
+import { Like } from "../models/like.model.js";
 
 const publishAVideo = asyncHandler(async (req, res) => {
     //title, desc, and select a video file and thumbnail picture'
@@ -111,11 +112,18 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "VideoId is required")
     }
 
-    const video = await Video.findById(videoId);
+    const video = await Video.findById(videoId).lean();
     if (!video) {
         throw new ApiError(404, "Video Not Found")
     }
 
+    const existingLike = await Like.findOne({
+        video: videoId,
+        likedBy: req.user._id
+    })
+
+    //!! converts the obj/null into a strict true or false
+    video.isLiked = !!existingLike
     return res
         .status(200)
         .json(new ApiResponse(200, video, "Video fetched Successfully"))

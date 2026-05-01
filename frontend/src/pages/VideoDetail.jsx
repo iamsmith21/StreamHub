@@ -10,11 +10,26 @@ export default function VideoDetail() {
 
     const { id } = useParams()
     const [video, setVideo] = useState(null)
+    const [isLiked, setIsLiked] = useState(false)
 
+    const handleLikeToggle = async () => {
+        try {
+            const res = await axios.post(`/api/v1/likes/toggle/v/${id}`)
+
+            if (res.data.message === "Liked Successfully") {
+                setIsLiked(true)
+            } else {
+                setIsLiked(false)
+            }
+        } catch (error) {
+            console.log("Error toggling like", error)
+        }
+    }
     useEffect(() => {
         axios.get(`/api/v1/videos/${id}`)
             .then((res) => {
                 setVideo(res.data.data)
+                setIsLiked(res.data.data.isLiked)
             })
             .catch((err) => console.log("Error fetching video", err))
     }, [id])
@@ -54,8 +69,10 @@ export default function VideoDetail() {
                 </div>
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 glass-panel p-2 rounded-full">
-                    <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10">
-                        <ThumbsUp className="w-5 h-5" /> <span>Like</span>
+                    <button
+                        onClick={handleLikeToggle}
+                        className={`flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10 ${isLiked ? 'text-purple-400' : 'text-white'}`}>
+                        <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-purple-400' : ''}`} />  <span>{isLiked ? 'Liked' : 'Like'}</span>
                     </button>
                     <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10">
                         <MessageSquare className="w-5 h-5" /> <span>Comment</span>
