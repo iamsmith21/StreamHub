@@ -1,9 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Home, Compass, FolderHeart, TrendingUp, User, Settings, LogIn, UserPlus } from "lucide-react";
+import axios from "axios";
 
 export default function Sidebar() {
   const location = useLocation();
+
+  //ask the backend who is currently logged in
 
   const navItems = [
     { name: "Home", path: "/", icon: Home },
@@ -20,7 +24,7 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 h-screen sticky top-0 flex flex-col justify-between py-8 px-4 glass-panel border-r border-white/5 z-50">
-      
+
       {/* Brand Logo */}
       <div className="flex items-center gap-3 px-4 mb-10 cursor-pointer">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-[0_0_15px_rgba(170,59,255,0.5)]">

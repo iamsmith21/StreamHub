@@ -5,6 +5,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
 import mongoose, { mongo } from "mongoose";
 import { Like } from "../models/like.model.js";
+import { Subscription } from "../models/subscription.model.js";
+
 
 const publishAVideo = asyncHandler(async (req, res) => {
     //title, desc, and select a video file and thumbnail picture'
@@ -112,7 +114,11 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "VideoId is required")
     }
 
-    const video = await Video.findById(videoId).lean();
+    await Video.updateOne({
+        _id: videoId
+    }, { $inc: { views: 1 } })
+
+    const video = await Video.findByIdAndUpdate(videoId).lean();
     if (!video) {
         throw new ApiError(404, "Video Not Found")
     }
@@ -120,9 +126,15 @@ const getVideoById = asyncHandler(async (req, res) => {
     const existingLike = await Like.findOne({
         video: videoId,
         likedBy: req.user._id
+
     })
 
+    const existingSub = await Subscription.findOne({
+        subscriber: req.user._id,
+        channel: video.owner
+    })
     //!! converts the obj/null into a strict true or false
+    video.isSubscribed = !!existingSub
     video.isLiked = !!existingLike
     return res
         .status(200)
