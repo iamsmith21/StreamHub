@@ -4,6 +4,8 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Sidebar from './components/Sidebar'
 import VideoDetail from './pages/VideoDetail'
+import Channel from './pages/Channel'
+import Studio from './pages/Studio'
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/video/:id" element={<VideoDetail />} />
+          <Route path="/c/:username" element={<Channel />} />
+          <Route path="/studio" element={<Studio />} />
         </Routes>
       </main>
     </div>

@@ -1,14 +1,31 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Home, Compass, FolderHeart, TrendingUp, User, Settings, LogIn, UserPlus } from "lucide-react";
+import { Upload, LogOut, Home, Compass, FolderHeart, TrendingUp, User, Settings, LogIn, UserPlus } from "lucide-react";
 import axios from "axios";
 
 export default function Sidebar() {
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   //ask the backend who is currently logged in
+  useEffect(() => {
+    axios.get("/api/v1/users/current-user")
+      .then((res) => {
+        setUser(res.data.data);
+      })
+      .catch((err) => console.log("Error fetching user", err))
+  }, [location.pathname])
 
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/v1/users/logout")
+      setUser(null);
+      navigate("/");
+    } catch (error) {
+      console.log("Error during logout", error)
+    }
+  }
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Explore", path: "/explore", icon: Compass },
@@ -38,6 +55,18 @@ export default function Sidebar() {
         </span>
       </div>
 
+      {/* Studio Create Button */}
+      {user && (
+        <div className="px-4 mb-6">
+          <Link to="/studio">
+            <button className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(170,59,255,0.3)] hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:-translate-y-1">
+              <Upload className="w-5 h-5" />
+              <span>Studio</span>
+            </button>
+          </Link>
+        </div>
+      )}
+
       {/* Main Navigation */}
       <div className="flex-1 flex flex-col gap-2">
         {navItems.map((item) => {
@@ -65,14 +94,33 @@ export default function Sidebar() {
 
       {/* Bottom Navigation */}
       <div className="flex flex-col gap-2 mt-8 pt-8 border-t border-white/5">
-        {bottomItems.map((item) => (
-          <Link key={item.name} to={item.path}>
-            <div className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200 group">
-              <item.icon className="w-5 h-5 group-hover:text-purple-400" />
-              <span>{item.name}</span>
+        {user ? (
+          <>
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10 mb-2 shadow-lg">
+              <img src={user.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover border-purple-500/50" />
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-white font-bold text-sm truncate">{user.fullname}</span>
+                <span className="text-cyan-400 text-xs truncate">@{user.username}</span>
+              </div>
             </div>
-          </Link>
-        ))}
+
+            <button onClick={handleLogout} className="flex items-center gap-4 py-3 px-4 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors duration-200 group w-full text-left">
+              <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-semibold">Sign Out</span>
+            </button>
+          </>
+        ) : (
+          <>
+            {bottomItems.map((item) => (
+              <Link key={item.name} to={item.path}>
+                <div className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200 group">
+                  <item.icon className="w-5 h-5 group-hover:text-purple-400" />
+                  <span>{item.name}</span>
+                </div>
+              </Link>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

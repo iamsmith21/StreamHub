@@ -91,6 +91,43 @@ const getAllVideos = asyncHandler(async (req, res) => {
         })
     }
 
+    pipeline.push({
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner"
+        }
+    })
+
+    pipeline.push({
+        $unwind: {
+            path: "$owner",
+            preserveNullAndEmptyArrays: true
+        }
+    })
+
+    pipeline.push({
+        $lookup: {
+            from: "subscriptions",
+            localField: "owner._id",
+            foreignField: "channel",
+            as: "subscribers"
+        }
+    })
+
+    pipeline.push({
+        $addFields: {
+            "owner.subscribersCount": { $size: { $ifNull: ["$subscribers", []] } }
+        }
+    })
+
+    pipeline.push({
+        $project: {
+            subscribers: 0 // clean up the array
+        }
+    })
+
     const videoAggregate = Video.aggregate(pipeline)
 
     const options = {
@@ -118,7 +155,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         _id: videoId
     }, { $inc: { views: 1 } })
 
-    const video = await Video.findByIdAndUpdate(videoId).lean();
+    const video = await Video.findById(videoId).populate("owner", "fullname username avatar").lean();
     if (!video) {
         throw new ApiError(404, "Video Not Found")
     }
@@ -129,10 +166,13 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     })
 
-    const existingSub = await Subscription.findOne({
-        subscriber: req.user._id,
-        channel: video.owner
-    })
+    let existingSub = null;
+    if (video.owner) {
+        existingSub = await Subscription.findOne({
+            subscriber: req.user._id,
+            channel: video.owner._id
+        })
+    }
     //!! converts the obj/null into a strict true or false
     video.isSubscribed = !!existingSub
     video.isLiked = !!existingLike

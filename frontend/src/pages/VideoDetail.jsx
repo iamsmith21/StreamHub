@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import axios from "axios"
 import { motion } from "framer-motion"
 import { ThumbsUp, MessageSquare, Share2, UserPlus } from "lucide-react"
@@ -63,7 +63,7 @@ export default function VideoDetail() {
 
     const handleSubscribe = async () => {
         try {
-            const res = await axios.post(`/api/v1/subscriptions/c/${video.owner}`)
+            const res = await axios.post(`/api/v1/subscriptions/c/${video.owner._id}`)
 
             if (res.data.message === "Subscribed Successfully") {
                 setIsSub(true)
@@ -114,11 +114,20 @@ export default function VideoDetail() {
 
                 {/* Channel Info */}
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 shadow-lg" />
-                    <div>
-                        <h3 className="text-lg font-bold text-white">Awesome Channel</h3>
-                        <p className="text-sm text-gray-400">1.2M Subscribers</p>
-                    </div>
+                    {/* The Creator's Avatar */}
+                    {video.owner?.avatar ? (
+                        <img src={video.owner.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover shadow-lg border border-purple-500/30" />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 shadow-lg" />
+                    )}
+
+                    {/* The Creator's Name */}
+                    <Link to={`/c/${video.owner?.username}`}>
+                        <div className="hover:opacity-80 transition-opacity">
+                            <h3 className="text-lg font-bold text-white">{video.owner?.fullname || "Unknown Creator"}</h3>
+                            <p className="text-sm text-cyan-400">@{video.owner?.username || "unknown"}</p>
+                        </div>
+                    </Link>
                     <button
                         onClick={handleSubscribe}
                         className={`ml-4 bg-white text-black hover:bg-gray-200 font-bold py-2 px-6 rounded-full transition-colors flex items-center gap-2 ${isSub ? 'bg-red-700 text-black-300 border border-gray-600 hover:bg-gray-700'
