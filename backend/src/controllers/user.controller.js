@@ -272,7 +272,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     //update the user avatar in DB
     //send the updated user data to frontend
 
-    const avatarLocalPath = req.files?.avatar?.[0]?.path
+    const avatarLocalPath = req.file?.path
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required.")
@@ -303,7 +303,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     //update the user cover image in DB
     //send the updated user data to frontend
 
-    const coverImageLocalPath = req.files?.coverImage?.[0]?.path
+    const coverImageLocalPath = req.file?.path
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Cover Image file is required.")

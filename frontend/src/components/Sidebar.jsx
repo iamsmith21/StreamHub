@@ -40,17 +40,17 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 h-screen sticky top-0 flex flex-col justify-between py-8 px-4 glass-panel border-r border-white/5 z-50">
+    <div className="w-[280px] h-[calc(100vh-2rem)] sticky top-4 ml-4 flex flex-col justify-between py-8 px-4 glass-panel rounded-3xl z-50">
 
       {/* Brand Logo */}
       <div className="flex items-center gap-3 px-4 mb-10 cursor-pointer">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-[0_0_15px_rgba(170,59,255,0.5)]">
+        <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-md">
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+        <span className="text-2xl font-bold tracking-tight text-white">
           StreamHub
         </span>
       </div>
@@ -59,7 +59,7 @@ export default function Sidebar() {
       {user && (
         <div className="px-4 mb-6">
           <Link to="/studio">
-            <button className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(170,59,255,0.3)] hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:-translate-y-1">
+            <button className="w-full py-3.5 px-4 bg-white hover:bg-zinc-200 text-black rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
               <Upload className="w-5 h-5" />
               <span>Studio</span>
             </button>
@@ -76,16 +76,13 @@ export default function Sidebar() {
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-white/10 rounded-xl border border-white/10"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="absolute inset-0 bg-white/10 rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <div className={`relative flex items-center gap-4 px-4 py-3 rounded-xl transition-colors duration-200 ${isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white"}`}>
-                <item.icon className={`w-5 h-5 ${isActive ? "text-cyan-400" : "group-hover:text-cyan-400"}`} />
+              <div className={`relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-colors duration-300 ${isActive ? "text-white font-semibold" : "text-zinc-500 hover:text-white"}`}>
+                <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "group-hover:text-white"}`} />
                 <span>{item.name}</span>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-cyan-400 rounded-r-full shadow-[0_0_10px_rgba(0,240,255,0.5)]" />
-                )}
               </div>
             </Link>
           );

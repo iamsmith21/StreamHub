@@ -99,7 +99,7 @@ export default function VideoDetail() {
             className="max-w-[1200px] mx-auto pb-20"
         >
             {/* Cinematic Video Player */}
-            <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(170,59,255,0.15)] mb-6 border border-white/10">
+            <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden mb-6 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <video
                     src={video.videoFile}
                     poster={video.thumbnail}
@@ -114,24 +114,23 @@ export default function VideoDetail() {
 
                 {/* Channel Info */}
                 <div className="flex items-center gap-4">
-                    {/* The Creator's Avatar */}
                     {video.owner?.avatar ? (
-                        <img src={video.owner.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover shadow-lg border border-purple-500/30" />
+                        <img src={video.owner.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover border border-white/20" />
                     ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 shadow-lg" />
+                        <div className="w-12 h-12 rounded-full bg-zinc-800 border border-white/10" />
                     )}
 
                     {/* The Creator's Name */}
                     <Link to={`/c/${video.owner?.username}`}>
                         <div className="hover:opacity-80 transition-opacity">
-                            <h3 className="text-lg font-bold text-white">{video.owner?.fullname || "Unknown Creator"}</h3>
-                            <p className="text-sm text-cyan-400">@{video.owner?.username || "unknown"}</p>
+                            <h3 className="text-lg font-bold text-white tracking-tight">{video.owner?.fullname || "Unknown Creator"}</h3>
+                            <p className="text-sm text-zinc-500">@{video.owner?.username || "unknown"}</p>
                         </div>
                     </Link>
                     <button
                         onClick={handleSubscribe}
-                        className={`ml-4 bg-white text-black hover:bg-gray-200 font-bold py-2 px-6 rounded-full transition-colors flex items-center gap-2 ${isSub ? 'bg-red-700 text-black-300 border border-gray-600 hover:bg-gray-700'
-                            : 'bg-grey-400 text-black hover:bg-gray-200'}`}>
+                        className={`ml-4 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2 ${isSub ? 'bg-zinc-800 text-white border border-white/10 hover:bg-zinc-700'
+                            : 'bg-white text-black hover:bg-zinc-200'}`}>
                         <UserPlus className="w-4 h-4" /> {isSub ? "Subscribed" : "Subscribe"}
                     </button>
                 </div>

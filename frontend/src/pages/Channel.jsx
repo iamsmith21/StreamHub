@@ -54,11 +54,11 @@ export default function Channel() {
     return (
         <div className="w-full pb-20">
             {/* Channel Banner */}
-            <div className="w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-8 relative bg-gray-900 border border-white/10 shadow-[0_0_40px_rgba(170,59,255,0.15)]">
+            <div className="w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-8 relative bg-zinc-900 border border-white/5 shadow-2xl">
                 {channel.coverImage ? (
                     <img src={channel.coverImage} className="w-full h-full object-cover" alt="banner" />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-r from-purple-900 to-cyan-900 opacity-50" />
+                    <div className="w-full h-full bg-zinc-900 opacity-50" />
                 )}
             </div>
 
@@ -67,7 +67,7 @@ export default function Channel() {
                 <img 
                     src={channel.avatar} 
                     alt="avatar" 
-                    className="w-32 h-32 rounded-full object-cover border-4 border-purple-500/50 shadow-[0_0_20px_rgba(170,59,255,0.4)] -mt-20 md:-mt-16 relative z-10 bg-black"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-black shadow-2xl -mt-20 md:-mt-16 relative z-10 bg-black"
                 />
                 
                 <div className="flex-1 text-center md:text-left">
@@ -83,10 +83,10 @@ export default function Channel() {
 
                 <button
                     onClick={handleSubscribe}
-                    className={`font-bold py-3 px-8 rounded-full transition-all transform hover:-translate-y-1 flex items-center gap-2 ${
+                    className={`font-semibold py-3 px-8 rounded-full transition-all flex items-center gap-2 ${
                         isSub 
-                        ? 'bg-red-700 text-white border border-gray-600 hover:bg-red-600'
-                        : 'bg-white text-black hover:bg-gray-200'
+                        ? 'bg-zinc-800 text-white border border-white/10 hover:bg-zinc-700'
+                        : 'bg-white text-black hover:bg-zinc-200'
                     }`}
                 >
                     <UserPlus className="w-5 h-5" /> 

@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 import { motion } from "framer-motion"
-import { Upload } from "lucide-react"
+import { Upload, Trash2 } from "lucide-react"
 
 export default function Studio() {
     const [title, setTitle] = useState("")
@@ -9,6 +9,33 @@ export default function Studio() {
     const [videoFile, setVideoFile] = useState(null)
     const [thumbnail, setThumbnail] = useState(null)
     const [isUploading, setIsUploading] = useState(false)
+    const [user, setUser] = useState(null)
+    const [myVideos, setMyVideos] = useState([])
+
+    useEffect(() => {
+        axios.get("/api/v1/users/current-user")
+            .then((res) => {
+                const currentUser = res.data.data;
+                setUser(currentUser);
+                return axios.get(`/api/v1/videos?userId=${currentUser._id}`);
+            })
+            .then((res) => {
+                setMyVideos(res.data.data.docs);
+            })
+            .catch((err) => console.log("Failed to fetch videos", err))
+    }, [])
+
+    const handleDelete = async (videoId) => {
+        if (!window.confirm("Are you sure you want to delete this video?")) return;
+        
+        try {
+            await axios.delete(`/api/v1/videos/${videoId}`)
+            setMyVideos(prev => prev.filter(v => v._id !== videoId))
+        } catch (error) {
+            console.log("Delete failed", error)
+            alert("Failed to delete video")
+        }
+    }
 
     const handleUpload = async (e) => {
         e.preventDefault()
@@ -18,13 +45,21 @@ export default function Studio() {
         formData.append("title", title);
         formData.append("description", description);
         formData.append("videoFile", videoFile);
-        formData.append("thumbnail", thumbnail);
+        if (thumbnail) {
+            formData.append("thumbnail", thumbnail);
+        }
 
         try {
             await axios.post("/api/v1/videos", formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             })
-            alert("Upload Success!") // You can change this to a redirect later!
+            alert("Upload Success!") 
+            
+            // Refresh the videos list
+            if (user) {
+                const res = await axios.get(`/api/v1/videos?userId=${user._id}`);
+                setMyVideos(res.data.data.docs);
+            }
         } catch (error) {
             console.log("Upload Failed", error)
         } finally {
@@ -69,8 +104,8 @@ export default function Studio() {
                         <input type="file" accept="video/*" className="text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30 transition-all" onChange={(e) => setVideoFile(e.target.files[0])} required />
                     </label>
                     <label className="flex-1 p-4 border border-dashed border-white/20 rounded-xl hover:border-cyan-400/50 hover:bg-white/5 transition-all cursor-pointer group">
-                        <span className="block text-gray-400 mb-2 group-hover:text-cyan-300">Thumbnail</span>
-                        <input type="file" accept="image/*" className="text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30 transition-all" onChange={(e) => setThumbnail(e.target.files[0])} required />
+                        <span className="block text-gray-400 mb-2 group-hover:text-cyan-300">Thumbnail (Optional - Auto-Generated)</span>
+                        <input type="file" accept="image/*" className="text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30 transition-all" onChange={(e) => setThumbnail(e.target.files[0])} />
                     </label>
                 </div>
 
@@ -82,6 +117,39 @@ export default function Studio() {
                     {isUploading ? "Uploading to Cloudinary..." : "Publish Video"}
                 </button>
             </motion.form>
+
+            {/* My Uploads List */}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="glass-panel p-8 rounded-2xl flex flex-col gap-6 shadow-2xl relative overflow-hidden"
+            >
+                <h2 className="text-2xl font-bold text-white mb-2">My Uploads</h2>
+                
+                {myVideos.length === 0 ? (
+                    <p className="text-gray-400">No videos uploaded yet.</p>
+                ) : (
+                    <div className="flex flex-col gap-4">
+                        {myVideos.map(video => (
+                            <div key={video._id} className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 group hover:bg-white/10 transition-colors">
+                                <img src={video.thumbnail} className="w-32 h-20 object-cover rounded-lg" alt="thumbnail" />
+                                <div className="flex-1">
+                                    <h3 className="text-white font-bold">{video.title}</h3>
+                                    <p className="text-gray-400 text-sm line-clamp-1">{video.description}</p>
+                                </div>
+                                <button 
+                                    onClick={() => handleDelete(video._id)}
+                                    className="p-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                                    title="Delete Video"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </motion.div>
         </div>
     )
 }

@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
-import mongoose, { mongo } from "mongoose";
+import mongoose, { isValidObjectId, mongo } from "mongoose";
 import { Like } from "../models/like.model.js";
 import { Subscription } from "../models/subscription.model.js";
 
@@ -26,18 +26,30 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     const video = await uploadOnCloudinary(videoFileLocalPath)
 
-    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
+    // const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
     if (!video) {
         throw new ApiError(400, "Video Failed to Upload on Cloudinary")
     }
 
-    if (!thumbnail) {
-        throw new ApiError(400, "Thumbnail Failed to Upload on Cloudinary")
+    // if (!thumbnail) {
+    //     throw new ApiError(400, "Thumbnail Failed to Upload on Cloudinary")
+    // }
+
+    let finalThumbnailUrl = "";
+
+    if (thumbnailLocalPath) {
+        const uploadedThumb = await uploadOnCloudinary(thumbnailLocalPath);
+        if (uploadedThumb) {
+            finalThumbnailUrl = uploadedThumb.url;
+        }
     }
 
+    if (!finalThumbnailUrl) {
+        finalThumbnailUrl = video.url.substring(0, video.url.lastIndexOf(".")) + ".jpg";
+    }
     const newVideo = await Video.create({
         videoFile: video.url,
-        thumbnail: thumbnail.url,
+        thumbnail: finalThumbnailUrl,
         title: title,
         description: description,
         duration: video.duration,
@@ -181,9 +193,50 @@ const getVideoById = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, video, "Video fetched Successfully"))
 })
 
+const getTrendingHeroVideos = asyncHandler(async (req, res) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const trendingVideos = await Video.find({
+        createdAt: { $gte: sevenDaysAgo }
+    })
+        .sort({ views: -1 })
+        .limit(5)
+        .populate("owner", "fullname avatar username");
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, trendingVideos, "Trending Videos Fetched Successfully"))
+})
+
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params;
+
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video ID")
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404, "Video not Found")
+
+    }
+
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You do not have permission to delete this video")
+    }
+
+    await Video.findByIdAndDelete(videoId);
+
+    return res.status(200)
+        .json(new ApiResponse(200, {}, "Video Deleted Successfully"))
+})
 
 export {
     publishAVideo,
     getAllVideos,
-    getVideoById
+    getVideoById,
+    getTrendingHeroVideos,
+    deleteVideo
 }
