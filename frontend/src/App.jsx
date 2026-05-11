@@ -9,6 +9,8 @@ import VideoDetail from './pages/VideoDetail'
 import Channel from './pages/Channel'
 import Studio from './pages/Studio'
 import Settings from './pages/Settings'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 
 function App() {
   useEffect(() => {
@@ -32,7 +34,7 @@ function App() {
     <div className='flex flex-col min-h-screen bg-black w-full overflow-x-hidden'>
       <TopNav />
 
-      <main className="flex-1 w-full max-w-[2000px] mx-auto p-6 md:p-12 relative z-10">
+      <main className="flex-1 w-full max-w-[2000px] mx-auto p-4 md:p-8 lg:p-12 relative z-10">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -41,6 +43,8 @@ function App() {
           <Route path="/c/:username" element={<Channel />} />
           <Route path="/studio" element={<Studio />} />
           <Route path='/settings' element={<Settings />} />
+          <Route path='/privacy' element={<Privacy />} />
+          <Route path='/terms' element={<Terms />} />
         </Routes>
       </main>
     </div>

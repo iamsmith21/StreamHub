@@ -6,9 +6,19 @@ import { upload } from "../middlewares/multer.middleware.js"
 
 const router = Router()
 
+// ==============================
+// PUBLIC ROUTES
+// ==============================
+router.route("/").get(getAllVideos)
+router.route("/trending/hero").get(getTrendingHeroVideos)
+router.route("/:videoId").get(getVideoById)
+
+// ==============================
+// PROTECTED ROUTES (Require Login)
+// ==============================
 router.use(verifyJWT);
 
-router.route("/").get(getAllVideos).post(upload.fields([
+router.route("/").post(upload.fields([
     {
         name: "videoFile",
         maxCount: 1
@@ -19,8 +29,6 @@ router.route("/").get(getAllVideos).post(upload.fields([
     }
 ]), publishAVideo)
 
-router.route("/trending/hero").get(getTrendingHeroVideos)
-router.route("/:videoId").get(getVideoById).delete(deleteVideo)
-
+router.route("/:videoId").delete(deleteVideo)
 
 export default router

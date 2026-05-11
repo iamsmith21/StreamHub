@@ -14,13 +14,11 @@ export default function Channel() {
     useEffect(() => {
         const fetchChannelData = async () => {
             try {
-                // 1. Fetch the Channel Profile
                 const channelRes = await axios.get(`/api/v1/users/channel/${username}`)
                 const channelData = channelRes.data.data
                 setChannel(channelData)
                 setIsSub(channelData.isSubscribed)
 
-                // 2. Fetch all Videos uploaded by this channel
                 const videosRes = await axios.get(`/api/v1/videos?userId=${channelData._id}`)
                 setVideos(videosRes.data.data.docs)
             } catch (error) {
@@ -53,7 +51,6 @@ export default function Channel() {
 
     return (
         <div className="w-full pb-20">
-            {/* Channel Banner */}
             <div className="w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-8 relative bg-zinc-900 border border-white/5 shadow-2xl">
                 {channel.coverImage ? (
                     <img src={channel.coverImage} className="w-full h-full object-cover" alt="banner" />
@@ -62,7 +59,6 @@ export default function Channel() {
                 )}
             </div>
 
-            {/* Channel Header Info */}
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 px-4 md:px-8 mb-12">
                 <img 
                     src={channel.avatar} 
@@ -96,7 +92,6 @@ export default function Channel() {
 
             <div className="w-full h-[1px] bg-white/10 mb-12" />
 
-            {/* Videos Grid */}
             <h2 className="text-2xl font-bold text-white mb-8 px-4">Latest Uploads</h2>
             
             {videos.length === 0 ? (

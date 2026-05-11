@@ -21,11 +21,7 @@ function timeAgo(dateString) {
     if (interval >= 1) return Math.floor(interval) + " minutes ago";
     return "Just now";
 }
-
-
 export default function VideoDetail() {
-
-
     const { id } = useParams()
     const [video, setVideo] = useState(null)
     const [isLiked, setIsLiked] = useState(false)
@@ -98,7 +94,6 @@ export default function VideoDetail() {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-[1200px] mx-auto pb-20"
         >
-            {/* Cinematic Video Player */}
             <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden mb-6 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
                 <video
                     src={video.videoFile}
@@ -107,12 +102,10 @@ export default function VideoDetail() {
                     className="w-full h-full object-contain"
                 />
             </div>
-            {/* Video Info Section */}
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{video.title}</h1>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-8 border-b border-white/10">
 
-                {/* Channel Info */}
                 <div className="flex items-center gap-4">
                     {video.owner?.avatar ? (
                         <img src={video.owner.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover border border-white/20" />
@@ -120,7 +113,6 @@ export default function VideoDetail() {
                         <div className="w-12 h-12 rounded-full bg-zinc-800 border border-white/10" />
                     )}
 
-                    {/* The Creator's Name */}
                     <Link to={`/c/${video.owner?.username}`}>
                         <div className="hover:opacity-80 transition-opacity">
                             <h3 className="text-lg font-bold text-white tracking-tight">{video.owner?.fullname || "Unknown Creator"}</h3>
@@ -134,7 +126,6 @@ export default function VideoDetail() {
                         <UserPlus className="w-4 h-4" /> {isSub ? "Subscribed" : "Subscribe"}
                     </button>
                 </div>
-                {/* Action Buttons */}
                 <div className="flex items-center gap-3 glass-panel p-2 rounded-full">
                     <button
                         onClick={handleLikeToggle}
@@ -149,20 +140,17 @@ export default function VideoDetail() {
                     </button>
                 </div>
             </div>
-            {/* Description Box */}
             <div className="glass-panel p-6 rounded-2xl">
                 <p className="font-semibold mb-2">{video.views} views • {timeAgo(video.createdAt)}</p>
                 <p className="text-gray-300 leading-relaxed whitespace-pre-line">{video.description}</p>
             </div>
 
-            {/* Comment Section */}
             <div className="mt-12 glass-panel p-8 rounded-2xl">
                 <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
                     <MessageSquare className="w-6 h-6 text-purple-400" />
                     {comments.length} Comments
                 </h2>
 
-                {/* Add Comment Input */}
                 <div className="flex gap-4 mb-10">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 shrink-0" />
                     <div className="flex-1">
@@ -182,7 +170,6 @@ export default function VideoDetail() {
                     </div>
                 </div>
 
-                {/* Comments List */}
                 <div className="flex flex-col gap-8">
                     {comments.map((comment) => (
                         <div key={comment._id} className="flex gap-4 group">

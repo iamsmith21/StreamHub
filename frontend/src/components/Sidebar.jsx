@@ -8,7 +8,6 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  //ask the backend who is currently logged in
   useEffect(() => {
     axios.get("/api/v1/users/current-user")
       .then((res) => {
@@ -42,7 +41,6 @@ export default function Sidebar() {
   return (
     <div className="w-[280px] h-[calc(100vh-2rem)] sticky top-4 ml-4 flex flex-col justify-between py-8 px-4 glass-panel rounded-3xl z-50">
 
-      {/* Brand Logo */}
       <div className="flex items-center gap-3 px-4 mb-10 cursor-pointer">
         <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-md">
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,7 +53,6 @@ export default function Sidebar() {
         </span>
       </div>
 
-      {/* Studio Create Button */}
       {user && (
         <div className="px-4 mb-6">
           <Link to="/studio">
@@ -67,7 +64,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Main Navigation */}
       <div className="flex-1 flex flex-col gap-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -89,7 +85,6 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* Bottom Navigation */}
       <div className="flex flex-col gap-2 mt-8 pt-8 border-t border-white/5">
         {user ? (
           <>
