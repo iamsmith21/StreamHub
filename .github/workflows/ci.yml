@@ -59,3 +59,6 @@ jobs:
 
       - name: Check for syntax errors
         run: node --check src/index.js
+
+      - name: Run tests
+        run: npm test
