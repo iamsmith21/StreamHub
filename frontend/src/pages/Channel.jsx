@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import axios from "axios"
 import { motion } from "framer-motion"
-import { UserPlus, Play, Upload } from "lucide-react"
+import { UserPlus, Upload } from "lucide-react"
 
 export default function Channel() {
     const { username } = useParams()

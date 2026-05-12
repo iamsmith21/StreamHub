@@ -172,20 +172,17 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Video Not Found")
     }
 
-    const existingLike = await Like.findOne({
-        video: videoId,
-        likedBy: req.user._id
-
-    })
+    const existingLike = req.user
+        ? await Like.findOne({ video: videoId, likedBy: req.user._id })
+        : null;
 
     let existingSub = null;
-    if (video.owner) {
+    if (req.user && video.owner) {
         existingSub = await Subscription.findOne({
             subscriber: req.user._id,
             channel: video.owner._id
         })
     }
-    //!! converts the obj/null into a strict true or false
     video.isSubscribed = !!existingSub
     video.isLiked = !!existingLike
     return res

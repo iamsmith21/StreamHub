@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload, LogOut, Home, Compass, FolderHeart, TrendingUp, User, Settings, LogIn, UserPlus } from "lucide-react";
+import { Upload, LogOut, Home, Compass, FolderHeart, TrendingUp, Settings, LogIn, UserPlus } from "lucide-react";
 import axios from "axios";
 
 export default function Sidebar() {

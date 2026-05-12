@@ -61,18 +61,18 @@ export default function Settings() {
 
     useEffect(() => {
         axios.get(`/api/v1/users/current-user`)
-            .then((res) => setUser(res.data.data))
-            .catch((err) => console.log(err))
+            .then((res) => {
+                const u = res.data.data
+                setUser(u)
+                setAccountForm({
+                    fullname: u.fullname || "",
+                    email: u.email || ""
+                })
+            })
+            .catch(() => console.log("Failed to load user"))
     }, [])
 
-    useEffect(() => {
-        if (user) {
-            setAccountForm({
-                fullname: user.fullname || "",
-                email: user.email || ""
-            })
-        }
-    }, [user])
+
 
     const handleAccountUpdate = async (e) => {
         e.preventDefault()

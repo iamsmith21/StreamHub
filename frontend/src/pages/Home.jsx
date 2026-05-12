@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import { motion } from "framer-motion"
 import Tilt from "react-parallax-tilt"
-import { Play, Star, Plus, Upload } from "lucide-react"
+import { Play, Upload } from "lucide-react"
 import { Link } from "react-router-dom"
 import Landing from "./Landing"
 
@@ -43,7 +43,7 @@ function Home() {
       .then((res) => {
         setUser(res.data.data)
       })
-      .catch((err) => {
+      .catch(() => {
         setUser(null)
       })
   }, [])
@@ -227,9 +227,9 @@ function Home() {
                   <div className="mt-1 flex flex-col text-sm text-zinc-400">
                     <span className="hover:text-white transition-colors">{video.owner?.fullname || "Unknown Creator"}</span>
                     <div className="flex items-center gap-1">
-                      <span>{Math.floor(Math.random() * 1000) + 10} views</span>
+                      <span>{video.views || 0} views</span>
                       <span className="text-[10px]">•</span>
-                      <span>{Math.floor(Math.random() * 10) + 1} days ago</span>
+                      <span>recently</span>
                     </div>
                   </div>
                 </div>

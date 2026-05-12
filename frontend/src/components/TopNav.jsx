@@ -20,8 +20,8 @@ export default function TopNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [serachQuery, setSearchQuery] = useState("")
-  const [showDropDown, setShowDropDown] = useState(false)
   const debouncedSerach = useDebounce(serachQuery, 300);
+  const showDropDown = serachQuery.trim().length > 0;
 
   const { data: serachResult = [], isFetching } = useQuery({
     queryKey: ["searchVideos", debouncedSerach],
@@ -33,10 +33,7 @@ export default function TopNav() {
     staleTime: 1000 * 60 * 5
   })
 
-  useEffect(() => {
-    if (serachQuery.trim().length === 0) setShowDropDown(false);
-    else setShowDropDown(true);
-  }, [serachQuery])
+
 
   const handleLogout = async () => {
     try {
@@ -54,7 +51,7 @@ export default function TopNav() {
       .then((res) => {
         setUser(res.data.data);
       })
-      .catch((err) => setUser(null))
+      .catch(() => setUser(null))
   }, [location.pathname])
 
   if ((location.pathname === '/' && user === null) || location.pathname === '/login' || location.pathname === '/signup') {
@@ -80,8 +77,6 @@ export default function TopNav() {
               placeholder="Search videos..."
               value={serachQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => { if (serachQuery.trim()) setShowDropDown(true) }}
-              onBlur={() => { setTimeout(() => setShowDropDown(false), 200) }}
               className="bg-transparent border-none outline-none text-sm text-white w-full placeholder-zinc-600" />
           </div>
 
@@ -97,7 +92,7 @@ export default function TopNav() {
                     <Link
                       key={v._id}
                       to={`/video/${v._id}`}
-                      onClick={() => { setShowDropDown(false); setSearchQuery("") }}
+                      onClick={() => { setSearchQuery("") }}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.04] transition-colors border-b border-white/[0.04] last:border-0" >
                       <img src={v.thumbnail} className="w-16 h-10 object-cover rounded-lg" alt="thumbnail" />
                       <div className="flex flex-col flex-1 min-w-0">
