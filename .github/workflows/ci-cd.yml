@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
@@ -62,3 +62,33 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  deploy-backend:
+    name: Deploy Backend on Render
+    needs: [backend]
+
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' #only to deply of pushed to main
+
+    steps:
+      - name: Trigger Render Deploy
+        run: curl -X POST ${{secrets.RENDER_DEPLOY_HOOK}}
+
+  deploy-frontend:
+    name: Deploy Frontend on Vercel
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{secrets.VERCEL_TOKEN}}
+          vercel-org-id: ${{secrets.VERCEL_ORG_ID}}
+          vercel-project-id: ${{secrets.VERCEL_PROJECT_ID}}
+          vercel-args: "--prod"
+          working-directory: "./frontend"

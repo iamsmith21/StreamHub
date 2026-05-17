@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import axios from "axios"
-import { motion } from "framer-motion"
-import { ThumbsUp, MessageSquare, Share2, UserPlus } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ThumbsUp, MessageSquare, Share2, UserPlus, Monitor, Sparkles} from "lucide-react"
 
 function timeAgo(dateString) {
     if (!dateString) return "Just now";
@@ -28,6 +28,17 @@ export default function VideoDetail() {
     const [comments, setComments] = useState([])
     const [newCommentText, setNewCommentText] = useState("")
     const [isSub, setIsSub] = useState(false)
+    const [isTheaterMode, setIsTheaterMode] = useState(false)
+    const [sparks, setSparks] = useState([]) // Stores pre-calculated spark data
+    const [commentSort, setCommentSort] = useState("latest") // "latest" or "oldest"
+
+    const sortedComments = [...comments].sort((a, b) => {
+        if (commentSort === "latest") {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        } else {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+    });
 
     const handleLikeToggle = async () => {
         try {
@@ -35,6 +46,15 @@ export default function VideoDetail() {
 
             if (res.data.message === "Liked Successfully") {
                 setIsLiked(true)
+                // Generate random spark data in the event handler (impure ok here)
+                const newSparks = [...Array(6)].map((_, i) => ({
+                    id: Math.random(), // Unique key for this burst
+                    x: (i % 2 === 0 ? 1 : -1) * (Math.random() * 50 + 20),
+                    y: -Math.random() * 100 - 50,
+                    rotate: Math.random() * 360
+                }))
+                setSparks(newSparks)
+                setTimeout(() => setSparks([]), 1000)
             } else {
                 setIsLiked(false)
             }
@@ -63,9 +83,9 @@ export default function VideoDetail() {
 
             if (res.data.message === "Subscribed Successfully") {
                 setIsSub(true)
-            } else {
-                setIsSub(false)
-            }
+            } else if (res.data.message === "Unsubscribed Successfully") {
+            setIsSub(false)
+        }
         } catch (error) {
             console.log("error toggling subscription", error)
         }
@@ -89,19 +109,34 @@ export default function VideoDetail() {
 
     if (!video) return <div className="text-center mt-20 text-xl">Loading...</div>
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-[1200px] mx-auto pb-20"
-        >
-            <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden mb-6 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <video
-                    src={video.videoFile}
-                    poster={video.thumbnail}
-                    controls
-                    className="w-full h-full object-contain"
-                />
-            </div>
+        <div className={`min-h-screen transition-colors duration-500 ${isTheaterMode ? 'bg-[#050505]' : 'bg-transparent'}`}>
+            {/* Theater Mode Overlay */}
+            <AnimatePresence>
+                {isTheaterMode && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-40 pointer-events-none"
+                    />
+                )}
+            </AnimatePresence>
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`mx-auto pb-20 transition-all duration-500 relative z-50 ${isTheaterMode ? 'max-w-none px-0' : 'max-w-[1200px] px-4'}`}
+            >
+                <div className={`w-full transition-all duration-500 ease-out mb-6 ${isTheaterMode ? 'aspect-[21/9] h-[80vh]' : 'aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]'}`}>
+                    <video
+                        src={video.videoFile}
+                        poster={video.thumbnail}
+                        controls
+                        className="w-full h-full object-contain bg-black"
+                    />
+                </div>
+
+                <div className={`${isTheaterMode ? 'max-w-[1200px] mx-auto px-4' : ''}`}>
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{video.title}</h1>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-8 border-b border-white/10">
@@ -126,14 +161,45 @@ export default function VideoDetail() {
                         <UserPlus className="w-4 h-4" /> {isSub ? "Subscribed" : "Subscribe"}
                     </button>
                 </div>
-                <div className="flex items-center gap-3 glass-panel p-2 rounded-full">
+                <div className="flex items-center gap-3 glass-panel p-2 rounded-full relative">
                     <button
                         onClick={handleLikeToggle}
-                        className={`flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10 ${isLiked ? 'text-purple-400' : 'text-white'}`}>
+                        className={`relative flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10 ${isLiked ? 'text-purple-400' : 'text-white'}`}>
                         <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-purple-400' : ''}`} />  <span>{isLiked ? 'Liked' : 'Like'}</span>
+
+                        {/* Like Sparks Animation */}
+                        <AnimatePresence>
+                            {sparks.length > 0 && (
+                                <div className="absolute inset-0 pointer-events-none">
+                                    {sparks.map((spark, i) => (
+                                        <motion.div
+                                            key={`${spark.id}-${i}`}
+                                            initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
+                                            animate={{
+                                                opacity: 0,
+                                                scale: 1.5,
+                                                x: spark.x,
+                                                y: spark.y,
+                                                rotate: spark.rotate
+                                            }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }}
+                                            className="absolute left-1/2 top-1/2 text-yellow-400"
+                                        >
+                                            <Sparkles className="w-4 h-4 fill-current" />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </AnimatePresence>
                     </button>
                     <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10">
                         <MessageSquare className="w-5 h-5" /> <span>Comment</span>
+                    </button>
+                    <button
+                        onClick={() => setIsTheaterMode(!isTheaterMode)}
+                        className={`flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors border-r border-white/10 ${isTheaterMode ? 'text-cyan-400' : 'text-white'}`}>
+                        <Monitor className="w-5 h-5" /> <span>Theater</span>
                     </button>
                     <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-full transition-colors">
                         <Share2 className="w-5 h-5" /> <span>Share</span>
@@ -146,10 +212,27 @@ export default function VideoDetail() {
             </div>
 
             <div className="mt-12 glass-panel p-8 rounded-2xl">
-                <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-                    <MessageSquare className="w-6 h-6 text-purple-400" />
-                    {comments.length} Comments
-                </h2>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                        <MessageSquare className="w-6 h-6 text-purple-400" />
+                        {comments.length} Comments
+                    </h2>
+
+                    <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+                        <button
+                            onClick={() => setCommentSort("latest")}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${commentSort === "latest" ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        >
+                            Latest
+                        </button>
+                        <button
+                            onClick={() => setCommentSort("oldest")}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${commentSort === "oldest" ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        >
+                            Oldest
+                        </button>
+                    </div>
+                </div>
 
                 <div className="flex gap-4 mb-10">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 shrink-0" />
@@ -171,7 +254,7 @@ export default function VideoDetail() {
                 </div>
 
                 <div className="flex flex-col gap-8">
-                    {comments.map((comment) => (
+                    {sortedComments.map((comment) => (
                         <div key={comment._id} className="flex gap-4 group">
                             {comment.owner?.avatar ? (
                                 <img src={comment.owner.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover shrink-0 border border-white/10" />
@@ -191,6 +274,8 @@ export default function VideoDetail() {
                 </div>
             </div>
 
-        </motion.div>
+                </div>
+            </motion.div>
+        </div>
     )
 }

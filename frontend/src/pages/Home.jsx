@@ -11,7 +11,25 @@ function Home() {
   const [videos, setVideos] = useState([])
   const [heroVideos, setHeroVideos] = useState([])
   const [activeIndex, setActiveIndex] = useState(0)
+  const [selectedCategory, setSelectedCategory] = useState("All")
   const carouselRef = useRef(null)
+
+  const categories = ["All", "Gaming", "Music", "Podcasts", "Coding", "Art"]
+
+  const filteredVideos = videos.filter(video => {
+    if (selectedCategory === "All") return true;
+    const term = selectedCategory.toLowerCase();
+    const title = (video.title || "").toLowerCase();
+    const desc = (video.description || "").toLowerCase();
+    if (term === "gaming") return title.includes("game") || title.includes("play") || title.includes("gta") || title.includes("stream") || desc.includes("game");
+    if (term === "music") return title.includes("music") || title.includes("song") || title.includes("beat") || title.includes("lofi") || desc.includes("music");
+    if (term === "podcasts") return title.includes("podcast") || title.includes("talk") || title.includes("episode") || desc.includes("podcast");
+    if (term === "coding") return title.includes("code") || title.includes("react") || title.includes("js") || title.includes("build") || desc.includes("code");
+    if (term === "art") return title.includes("art") || title.includes("draw") || title.includes("design") || title.includes("sketch") || desc.includes("art");
+    return false;
+  })
+
+  const displayedVideos = filteredVideos.length > 0 ? filteredVideos : videos;
 
   const optimizeThumbnail = (url) => {
     if (!url) return url;
@@ -191,9 +209,61 @@ function Home() {
       </div>
 
       <div className="mb-20">
-        <h2 className="text-2xl font-semibold mb-6 tracking-tight">Discover</h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <h2 className="text-2xl font-semibold tracking-tight">Discover</h2>
+          
+          <div className="flex flex-wrap items-center gap-2 bg-white/[0.02] p-1.5 rounded-2xl border border-white/5 backdrop-blur-md">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`relative px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                    isActive ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeCategoryPill"
+                      className="absolute inset-0 bg-white/10 rounded-xl border border-white/20"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    >
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                        <rect
+                          x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)"
+                          rx="10" ry="10"
+                          fill="none" stroke="url(#doodleGradient)" strokeWidth="1.5"
+                          strokeDasharray="4 3 6 2"
+                        />
+                        <defs>
+                          <linearGradient id="doodleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#ec4899" />
+                            <stop offset="100%" stopColor="#06b6d4" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </motion.div>
+                  )}
+                  <span className="relative z-10">{cat}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {filteredVideos.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 px-4 border border-dashed border-white/10 rounded-3xl my-6 bg-white/[0.01]"
+          >
+            <p className="text-zinc-500 italic text-base">No spatial artifacts specifically tailored for "{selectedCategory}". Displaying entire archive.</p>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-          {videos.map((video) => (
+          {displayedVideos.map((video) => (
             <Link to={`/video/${video._id}`} key={video._id} className="flex flex-col group cursor-pointer">
               
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 mb-4 border border-white/5">
